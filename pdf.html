@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image to PDF Pro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f4f6f8;
+  text-align: center;
+}
+
+.container {
+  margin-top: 80px;
+}
+
+.box {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 320px;
+  margin: auto;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+input, button {
+  margin: 10px 0;
+}
+
+button {
+  background: red;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: darkred;
+}
+
+.preview {
+  margin-top: 10px;
+  font-size: 12px;
+  text-align: left;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="box">
+    <h2>Image to PDF</h2>
+
+    <input type="file" id="file" multiple accept="image/*"><br>
+
+    <input type="text" id="filename" placeholder="Enter PDF Name"><br>
+
+    <button onclick="makePDF()">Convert to PDF</button>
+
+    <div class="preview" id="preview"></div>
+  </div>
+</div>
+
+<script>
+document.getElementById("file").addEventListener("change", function() {
+  const files = this.files;
+  let list = "";
+  for (let i = 0; i < files.length; i++) {
+    list += "• " + files[i].name + "<br>";
+  }
+  document.getElementById("preview").innerHTML = list;
+});
+
+async function makePDF() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  const files = document.getElementById("file").files;
+  let fileName = document.getElementById("filename").value;
+
+  if (files.length === 0) {
+    alert("Upload images first!");
+    return;
+  }
+
+  if (fileName === "") {
+    fileName = "converted";
+  }
+
+  for (let i = 0; i < files.length; i++) {
+    const img = await read(files[i]);
+
+    if (i > 0) pdf.addPage();
+
+    pdf.addImage(img, 'JPEG', 10, 10, 180, 160);
+  }
+
+  pdf.save(fileName + ".pdf");
+}
+
+function read(file) {
+  return new Promise(res => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result);
+    reader.readAsDataURL(file);
+  });
+}
+</script>
+
+</body>
+</html>
